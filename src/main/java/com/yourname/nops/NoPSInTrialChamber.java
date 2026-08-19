@@ -1,7 +1,8 @@
 package com.yourname.nops;
 
 import org.bukkit.ChatColor;
-import org.bukkit.block.Biome;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -13,29 +14,43 @@ public class NoPSInTrialChamber extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
-        getLogger().info("NoPSInTrialChamber включен! Блокировка приватов в Trial Chamber активна.");
+        getLogger().info("NoPSInTrialChamber включен! Защита от приватов рядом с Trial Chambers активна.");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
-        // 1. Проверяем биом
-        Biome biome = event.getBlock().getBiome();
-        String biomeName = biome.name();
+        // Проверяем только блоки ProtectionStones
+        String material = event.getBlock().getType().name();
+        int radius = 0;
         
-        // Логи в консоль для отладки
-        getLogger().info("Игрок " + event.getPlayer().getName() + 
-                       " ставит блок " + event.getBlock().getType().name() + 
-                       " в биоме " + biomeName);
+        if (material.equals("COAL_BLOCK")) {
+            radius = 25;
+        } else if (material.equals("CRYING_OBSIDIAN")) {
+            radius = 45;
+        } else if (material.equals("NETHERITE_BLOCK")) {
+            radius = 65;
+        } else {
+            return; // Не блок привата
+        }
         
-        // 2. Проверяем, является ли биом Trial Chamber
-        boolean isTrialChamber = biomeName.equals("TRIAL_CHAMBERS") || 
-                                 biomeName.contains("TRIAL") || 
-                                 biomeName.contains("CHAMBER");
+        // Проверяем есть ли в радиусе Vault или Trial Spawner
+        Block center = event.getBlock();
         
-        if (isTrialChamber) {
-            getLogger().info("ОБНАРУЖЕН TRIAL CHAMBER! Блокируем...");
-            event.setCancelled(true);
-            event.getPlayer().sendMessage(ChatColor.RED + "В Камере испытаний запрещено ставить приваты!");
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    Block checkBlock = center.getRelative(x, y, z);
+                    Material checkMaterial = checkBlock.getType();
+                    
+                    if (checkMaterial == Material.VAULT || 
+                        checkMaterial == Material.TRIAL_SPAWNER) {
+                        
+                        event.setCancelled(true);
+                        event.getPlayer().sendMessage(ChatColor.RED + "⛔ Нельзя ставить приват так близко к данжу! (Радиус защиты " + radius + " блоков накроет Хранилище)");
+                        return;
+                    }
+                }
+            }
         }
     }
 }
