@@ -1,7 +1,5 @@
 package com.yourname.nops;
 
-import dev.espi.protectionstones.ProtectionStones;
-import dev.espi.protectionstones.PSBlock;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Biome;
 import org.bukkit.event.EventHandler;
@@ -19,16 +17,20 @@ public class NoPSInTrialChamber extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        PSBlock psBlock = ProtectionStones.getPSBlock(event.getBlock());
-        if (psBlock == null) {
-            return; 
-        }
-
+        // Проверяем биом
         Biome biome = event.getBlock().getBiome();
         
         if (biome.name().equals("TRIAL_CHAMBERS")) {
-            event.setCancelled(true);
-            event.getPlayer().sendMessage(ChatColor.RED + "⚠ В Камере испытаний запрещено устанавливать блоки привата!");
+            // Проверяем материал блока (уголь, алмаз, незерит)
+            String material = event.getBlock().getType().name();
+            
+            if (material.equals("COAL_BLOCK") || 
+                material.equals("DIAMOND_ORE") || 
+                material.equals("NETHERITE_BLOCK")) {
+                
+                event.setCancelled(true);
+                event.getPlayer().sendMessage(ChatColor.RED + "⚠ В Камере испытаний запрещено устанавливать блоки привата!");
+            }
         }
     }
 }
