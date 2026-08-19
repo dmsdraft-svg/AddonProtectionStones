@@ -2,5 +2,6 @@ name: NoPSInTrialChamber
 version: 1.0
 main: com.yourname.nops.NoPSInTrialChamber
 api-version: '1.21'
-depend: [ProtectionStones]
-description: Запрещает установку блоков ProtectionStones в ванильной Камере испытаний (Trial Chamber).
+depend: [WorldGuard]
+softdepend: [ProtectionStones]
+description: Запрещает приваты рядом с Trial Chambers
