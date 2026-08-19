@@ -27,9 +27,10 @@ public class NoPSInTrialChamber extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockPlace(BlockPlaceEvent event) {
-        // Проверяем материал
         Material material = event.getBlock().getType();
-        int radius = 0;
+        
+        // Объявляем radius как final, чтобы использовать внутри lambda
+        final int radius;
         
         if (material == Material.COAL_BLOCK) {
             radius = 25;
@@ -38,15 +39,14 @@ public class NoPSInTrialChamber extends JavaPlugin implements Listener {
         } else if (material == Material.NETHERITE_BLOCK) {
             radius = 65;
         } else {
-            return; // Не блок привата
+            return; // Это не блок привата, пропускаем
         }
         
-        // Ждём 1 тик пока ProtectionStones создаст регион
+        // Ждём 1 тик, чтобы ProtectionStones успел создать регион
         Bukkit.getScheduler().runTaskLater(this, () -> {
             Block block = event.getBlock();
             Location loc = block.getLocation();
             
-            // Получаем менеджер регионов
             RegionManager regionManager = WorldGuard.getInstance()
                 .getPlatform()
                 .getRegionContainer()
@@ -54,7 +54,6 @@ public class NoPSInTrialChamber extends JavaPlugin implements Listener {
             
             if (regionManager == null) return;
             
-            // Проверяем есть ли в радиусе Vault или Trial Spawner
             boolean foundDungeon = false;
             
             for (int x = -radius; x <= radius; x++) {
@@ -63,8 +62,7 @@ public class NoPSInTrialChamber extends JavaPlugin implements Listener {
                         Block checkBlock = block.getRelative(x, y, z);
                         Material checkMaterial = checkBlock.getType();
                         
-                        if (checkMaterial == Material.VAULT || 
-                            checkMaterial == Material.TRIAL_SPAWNER) {
+                        if (checkMaterial == Material.VAULT || checkMaterial == Material.TRIAL_SPAWNER) {
                             foundDungeon = true;
                             break;
                         }
@@ -75,15 +73,16 @@ public class NoPSInTrialChamber extends JavaPlugin implements Listener {
             }
             
             if (foundDungeon) {
-                // Ищем регион ProtectionStones в этой точке и удаляем
                 Map<String, ProtectedRegion> regions = regionManager.getRegions();
                 for (Map.Entry<String, ProtectedRegion> entry : regions.entrySet()) {
                     ProtectedRegion region = entry.getValue();
                     if (region.contains(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
-                        // Проверяем что это PS регион (начинается с ps-)
+                        // Проверяем, что это регион ProtectionStones
                         if (region.getId().startsWith("ps-")) {
                             regionManager.removeRegion(region.getId());
-                            event.getPlayer().sendMessage(ChatColor.RED + "⛔ Приват удалён! Нельзя ставить рядом с данжем! (Радиус " + radius + " блоков)");
+                            if (event.getPlayer() != null) {
+                                event.getPlayer().sendMessage(ChatColor.RED + "⛔ Приват удалён! Нельзя ставить рядом с данжем! (Радиус " + radius + " блоков)");
+                            }
                             break;
                         }
                     }
