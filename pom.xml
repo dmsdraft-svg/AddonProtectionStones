@@ -16,13 +16,21 @@
     </properties>
 
     <repositories>
+        <!-- Spigot API -->
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        
+        <!-- Maven Central для ProtectionStones -->
+        <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
     </repositories>
 
     <dependencies>
+        <!-- Purpur/Spigot API для 1.21.1 -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
@@ -30,13 +38,12 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- ProtectionStones из папки libs -->
+        <!-- ProtectionStones из Maven Central -->
         <dependency>
             <groupId>dev.espi</groupId>
-            <artifactId>ProtectionStones</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/ProtectionStones.jar</systemPath>
+            <artifactId>protectionstones</artifactId>
+            <version>2.10.0</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
